@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💊 Supplement Tracker | Maratona 2025</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: #0f172a; color: #f1f5f9; min-height: 100vh; }
+        .checked-item { opacity: 0.5; text-decoration: line-through; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // ============ DATA ============
+        const PHASES = [
+            { id: 1, name: "Base", start: "2024-12-01", end: "2025-01-25", color: "#3b82f6" },
+            { id: 2, name: "Específica", start: "2025-01-26", end: "2025-03-08", color: "#8b5cf6" },
+            { id: 3, name: "Peak", start: "2025-03-09", end: "2025-04-05", color: "#f59e0b" },
+            { id: 4, name: "Taper", start: "2025-04-06", end: "2025-04-26", color: "#10b981" }
+        ];
+
+        const SUPPLEMENT_BLOCKS = {
+            manha: {
+                name: "Manhã",
+                time: "06:30",
+                emoji: "🌅",
+                color: "#3b82f6",
+                bgColor: "rgba(59, 130, 246, 0.15)",
+                items: [
+                    { id: "boro", name: "Boro", dose: "10mg" },
+                    { id: "d3k2", name: "Vit D3+K2", dose: "5000UI" },
+                    { id: "magthreo", name: "Mg L-Treonato", dose: "1000mg" },
+                    { id: "metilfolato", name: "Metilfolato", dose: "400mcg" },
+                    { id: "ashwa_am", name: "Ashwagandha", dose: "300mg" },
+                    { id: "tongkat", name: "Tongkat Ali", dose: "400mg" },
+                    { id: "creatina", name: "Creatina", dose: "5g" }
+                ]
+            },
+            pretreino: {
+                name: "Pré-Treino",
+                time: "Variável",
+                emoji: "⚡",
+                color: "#f59e0b",
+                bgColor: "rgba(245, 158, 11, 0.15)",
+                items: [
+                    { id: "colagenio", name: "Colagénio + Vit C", dose: "15g + 500mg", days: [3, 5] },
+                    { id: "beterraba", name: "Shot Beterraba", dose: "400mg NO₃", days: [0, 3] }
+                ]
+            },
+            almoco: {
+                name: "Almoço",
+                time: "13:30",
+                emoji: "🍽️",
+                color: "#10b981",
+                bgColor: "rgba(16, 185, 129, 0.15)",
+                items: [
+                    { id: "omega_pm1", name: "Ómega-3", dose: "1500mg" }
+                ]
+            },
+            tarde: {
+                name: "Tarde",
+                time: "16:00",
+                emoji: "🍒",
+                color: "#ec4899",
+                bgColor: "rgba(236, 72, 153, 0.15)",
+                items: [
+                    { id: "cereja_pm1", name: "Cereja Ácida", dose: "30mL", taperOnly: true }
+                ]
+            },
+            postreino: {
+                name: "Pós-Treino",
+                time: "Após exercício",
+                emoji: "💪",
+                color: "#8b5cf6",
+                bgColor: "rgba(139, 92, 246, 0.15)",
+                items: [
+                    { id: "whey", name: "Whey Isolada", dose: "25-30g", days: [0, 1, 2, 3, 4, 5] }
+                ]
+            },
+            noite: {
+                name: "Noite",
+                time: "21:00 - 22:00",
+                emoji: "🌙",
+                color: "#6366f1",
+                bgColor: "rgba(99, 102, 241, 0.15)",
+                items: [
+                    { id: "omega_pm2", name: "Ómega-3", dose: "1500mg" },
+                    { id: "cereja_pm2", name: "Cereja Ácida", dose: "30mL", taperOnly: true },
+                    { id: "magglic", name: "Mg Glicinato", dose: "300mg" },
+                    { id: "ashwa_pm", name: "Ashwagandha", dose: "300mg" }
+                ]
+            }
+        };
+
+        // ============ HELPERS ============
+        const formatDateKey = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        
+        const getPhase = (date) => {
+            const d = new Date(date);
+            for (const p of PHASES) {
+                if (d >= new Date(p.start) && d <= new Date(p.end + "T23:59:59")) return p;
+            }
+            return null;
+        };
+
+        const getWeek = (date) => {
+            const start = new Date("2024-12-01");
+            return Math.floor((new Date(date) - start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+        };
+
+        const getSupplementsForDay = (date) => {
+            const d = new Date(date);
+            const dow = d.getDay();
+            const phase = getPhase(date);
+            const isTaper = phase?.id === 4;
+            
+            const result = {};
+            Object.entries(SUPPLEMENT_BLOCKS).forEach(([key, block]) => {
+                const items = block.items.filter(item => {
+                    if (item.taperOnly && !isTaper) return false;
+                    if (item.days && !item.days.includes(dow)) {
+                        // In taper, beterraba is daily
+                        if (item.id === 'beterraba' && isTaper) return true;
+                        return false;
+                    }
+                    return true;
+                });
+                if (items.length > 0) {
+                    result[key] = { ...block, items };
+                }
+            });
+            return result;
+        };
+
+        const getTotalSupplements = (blocks) => Object.values(blocks).reduce((sum, b) => sum + b.items.length, 0);
+
+        // ============ APP ============
+        function App() {
+            const [selectedDate, setSelectedDate] = useState(new Date());
+            const [checked, setChecked] = useState(() => {
+                const saved = localStorage.getItem('suppTracker2');
+                return saved ? JSON.parse(saved) : {};
+            });
+
+            useEffect(() => {
+                localStorage.setItem('suppTracker2', JSON.stringify(checked));
+            }, [checked]);
+
+            const dateKey = formatDateKey(selectedDate);
+            const phase = getPhase(selectedDate);
+            const week = getWeek(selectedDate);
+            const blocks = getSupplementsForDay(selectedDate);
+            const dayData = checked[dateKey] || {};
+            
+            const total = getTotalSupplements(blocks);
+            const done = Object.values(blocks).reduce((sum, b) => 
+                sum + b.items.filter(i => dayData[i.id]).length, 0);
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+            const toggle = (id) => {
+                setChecked(prev => ({
+                    ...prev,
+                    [dateKey]: { ...prev[dateKey], [id]: !prev[dateKey]?.[id] }
+                }));
+            };
+
+            const changeDay = (delta) => {
+                const d = new Date(selectedDate);
+                d.setDate(d.getDate() + delta);
+                setSelectedDate(d);
+            };
+
+            const daysToRace = Math.max(0, Math.ceil((new Date("2025-04-26") - new Date()) / (1000*60*60*24)));
+            const dow = selectedDate.getDay();
+            const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            const dayEmojis = ['🏃', '💪', '🏊', '⚡', '💪', '🏊', '😴'];
+
+            return (
+                <div style={{ maxWidth: 480, margin: '0 auto', padding: 16 }}>
+                    
+                    {/* Header com progresso */}
+                    <div style={{ 
+                        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+                        borderRadius: 16, 
+                        padding: 16,
+                        marginBottom: 12
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                            <div>
+                                <div style={{ fontSize: 12, color: '#94a3b8' }}>🏃 Maratona Londres</div>
+                                <div style={{ fontSize: 20, fontWeight: 700 }}>
+                                    {daysToRace} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>dias</span>
+                                </div>
+                            </div>
+                            <div style={{ textAlign: 'right' }}>
+                                <div style={{ fontSize: 12, color: '#94a3b8' }}>
+                                    Sem. {week} • {phase?.name || '—'}
+                                </div>
+                                <div style={{ 
+                                    fontSize: 11, 
+                                    padding: '2px 8px', 
+                                    borderRadius: 99,
+                                    background: phase?.color || '#475569',
+                                    display: 'inline-block',
+                                    marginTop: 4
+                                }}>
+                                    Fase {phase?.id || '—'}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div style={{ marginBottom: 8 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 4 }}>
+                                <span style={{ color: '#94a3b8' }}>Progresso hoje</span>
+                                <span style={{ fontWeight: 600, color: pct === 100 ? '#10b981' : '#f1f5f9' }}>
+                                    {done}/{total} ({pct}%)
+                                </span>
+                            </div>
+                            <div style={{ height: 8, background: '#1e293b', borderRadius: 4, overflow: 'hidden' }}>
+                                <div style={{ 
+                                    height: '100%', 
+                                    width: `${pct}%`, 
+                                    background: pct === 100 ? '#10b981' : 'linear-gradient(90deg, #3b82f6, #8b5cf6)',
+                                    borderRadius: 4,
+                                    transition: 'width 0.3s'
+                                }} />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Date navigation */}
+                    <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'space-between',
+                        background: '#1e293b',
+                        borderRadius: 12,
+                        padding: '8px 12px',
+                        marginBottom: 12
+                    }}>
+                        <button onClick={() => changeDay(-1)} style={{ 
+                            background: 'none', border: 'none', color: '#94a3b8', 
+                            fontSize: 20, cursor: 'pointer', padding: '4px 12px'
+                        }}>←</button>
+                        
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: 13, color: '#94a3b8' }}>
+                                {dayEmojis[dow]} {dayNames[dow]}
+                            </div>
+                            <div style={{ fontSize: 15, fontWeight: 600 }}>
+                                {selectedDate.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' })}
+                            </div>
+                        </div>
+                        
+                        <button onClick={() => changeDay(1)} style={{ 
+                            background: 'none', border: 'none', color: '#94a3b8', 
+                            fontSize: 20, cursor: 'pointer', padding: '4px 12px'
+                        }}>→</button>
+                    </div>
+
+                    {/* Mini calendar week */}
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: 4, 
+                        marginBottom: 16,
+                        justifyContent: 'center'
+                    }}>
+                        {[-3, -2, -1, 0, 1, 2, 3].map(offset => {
+                            const d = new Date(selectedDate);
+                            d.setDate(d.getDate() + offset);
+                            const dk = formatDateKey(d);
+                            const dayChecked = checked[dk] || {};
+                            const dayBlocks = getSupplementsForDay(d);
+                            const dayTotal = getTotalSupplements(dayBlocks);
+                            const dayDone = Object.values(dayBlocks).reduce((sum, b) => 
+                                sum + b.items.filter(i => dayChecked[i.id]).length, 0);
+                            const dayPct = dayTotal > 0 ? Math.round((dayDone / dayTotal) * 100) : 0;
+                            const isSelected = offset === 0;
+                            const isToday = formatDateKey(new Date()) === dk;
+                            
+                            return (
+                                <button
+                                    key={offset}
+                                    onClick={() => setSelectedDate(d)}
+                                    style={{
+                                        width: 40, height: 48,
+                                        border: isSelected ? '2px solid #3b82f6' : '1px solid #334155',
+                                        borderRadius: 8,
+                                        background: isSelected ? '#1e3a5f' : '#1e293b',
+                                        cursor: 'pointer',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        position: 'relative'
+                                    }}
+                                >
+                                    <span style={{ fontSize: 10, color: '#64748b' }}>
+                                        {['D','S','T','Q','Q','S','S'][d.getDay()]}
+                                    </span>
+                                    <span style={{ 
+                                        fontSize: 14, 
+                                        fontWeight: isToday ? 700 : 500,
+                                        color: isToday ? '#3b82f6' : '#f1f5f9'
+                                    }}>
+                                        {d.getDate()}
+                                    </span>
+                                    {dayPct > 0 && (
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: 3,
+                                            width: 6, height: 6,
+                                            borderRadius: '50%',
+                                            background: dayPct === 100 ? '#10b981' : dayPct >= 50 ? '#f59e0b' : '#ef4444'
+                                        }} />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+
+                    {/* Supplement blocks */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        {Object.entries(blocks).map(([key, block]) => {
+                            const blockDone = block.items.filter(i => dayData[i.id]).length;
+                            const blockTotal = block.items.length;
+                            const allDone = blockDone === blockTotal;
+
+                            return (
+                                <div key={key} style={{ 
+                                    background: block.bgColor,
+                                    borderRadius: 12,
+                                    border: `1px solid ${block.color}33`,
+                                    overflow: 'hidden'
+                                }}>
+                                    {/* Block header */}
+                                    <div style={{ 
+                                        padding: '10px 14px',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        borderBottom: `1px solid ${block.color}22`
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span style={{ fontSize: 18 }}>{block.emoji}</span>
+                                            <div>
+                                                <div style={{ fontWeight: 600, fontSize: 14 }}>{block.name}</div>
+                                                <div style={{ fontSize: 11, color: '#94a3b8' }}>{block.time}</div>
+                                            </div>
+                                        </div>
+                                        <div style={{ 
+                                            fontSize: 12, 
+                                            fontWeight: 600,
+                                            color: allDone ? '#10b981' : block.color
+                                        }}>
+                                            {allDone ? '✓' : `${blockDone}/${blockTotal}`}
+                                        </div>
+                                    </div>
+
+                                    {/* Items */}
+                                    <div style={{ padding: '6px 8px' }}>
+                                        {block.items.map((item, idx) => {
+                                            const isChecked = dayData[item.id];
+                                            return (
+                                                <button
+                                                    key={item.id}
+                                                    onClick={() => toggle(item.id)}
+                                                    style={{
+                                                        width: '100%',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: 10,
+                                                        padding: '8px 10px',
+                                                        background: isChecked ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
+                                                        border: 'none',
+                                                        borderRadius: 8,
+                                                        cursor: 'pointer',
+                                                        transition: 'all 0.15s',
+                                                        marginBottom: idx < block.items.length - 1 ? 2 : 0
+                                                    }}
+                                                >
+                                                    <div style={{
+                                                        width: 22, height: 22,
+                                                        borderRadius: 6,
+                                                        border: isChecked ? 'none' : `2px solid ${block.color}`,
+                                                        background: isChecked ? '#10b981' : 'transparent',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        justifyContent: 'center',
+                                                        fontSize: 12,
+                                                        color: '#fff',
+                                                        flexShrink: 0
+                                                    }}>
+                                                        {isChecked && '✓'}
+                                                    </div>
+                                                    <div style={{ 
+                                                        flex: 1, 
+                                                        textAlign: 'left',
+                                                        opacity: isChecked ? 0.6 : 1
+                                                    }}>
+                                                        <span style={{ 
+                                                            fontSize: 13, 
+                                                            color: '#f1f5f9',
+                                                            textDecoration: isChecked ? 'line-through' : 'none'
+                                                        }}>
+                                                            {item.name}
+                                                        </span>
+                                                    </div>
+                                                    <span style={{ 
+                                                        fontSize: 11, 
+                                                        color: '#64748b',
+                                                        opacity: isChecked ? 0.5 : 1
+                                                    }}>
+                                                        {item.dose}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Quick actions */}
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: 8, 
+                        marginTop: 16 
+                    }}>
+                        <button
+                            onClick={() => {
+                                const allIds = {};
+                                Object.values(blocks).forEach(b => b.items.forEach(i => allIds[i.id] = true));
+                                setChecked(prev => ({ ...prev, [dateKey]: allIds }));
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: 10,
+                                color: '#10b981',
+                                fontSize: 13,
+                                fontWeight: 500,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            ✓ Marcar Todos
+                        </button>
+                        <button
+                            onClick={() => {
+                                setChecked(prev => ({ ...prev, [dateKey]: {} }));
+                            }}
+                            style={{
+                                flex: 1,
+                                padding: '12px',
+                                background: '#1e293b',
+                                border: '1px solid #334155',
+                                borderRadius: 10,
+                                color: '#ef4444',
+                                fontSize: 13,
+                                fontWeight: 500,
+                                cursor: 'pointer'
+                            }}
+                        >
+                            ✕ Limpar Dia
+                        </button>
+                    </div>
+
+                    {/* Taper notice */}
+                    {phase?.id === 4 && (
+                        <div style={{
+                            marginTop: 12,
+                            padding: '10px 14px',
+                            background: 'rgba(16, 185, 129, 0.15)',
+                            borderRadius: 10,
+                            border: '1px solid rgba(16, 185, 129, 0.3)',
+                            fontSize: 12,
+                            color: '#94a3b8'
+                        }}>
+                            <strong style={{ color: '#10b981' }}>⚡ Fase Taper</strong>
+                            <span> — Cereja Ácida 2x/dia + Beterraba diária activos</span>
+                        </div>
+                    )}
+
+                    {/* Footer stats */}
+                    <div style={{
+                        marginTop: 16,
+                        padding: '12px 16px',
+                        background: '#1e293b',
+                        borderRadius: 12,
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        textAlign: 'center'
+                    }}>
+                        <div>
+                            <div style={{ fontSize: 18, fontWeight: 700, color: '#f59e0b' }}>
+                                {(() => {
+                                    let streak = 0;
+                                    const d = new Date();
+                                    while (true) {
+                                        const dk = formatDateKey(d);
+                                        const dayBlocks = getSupplementsForDay(d);
+                                        const dayTotal = getTotalSupplements(dayBlocks);
+                                        const dayChecked = checked[dk] || {};
+                                        const dayDone = Object.values(dayBlocks).reduce((sum, b) => 
+                                            sum + b.items.filter(i => dayChecked[i.id]).length, 0);
+                                        if (dayTotal > 0 && dayDone === dayTotal) {
+                                            streak++;
+                                            d.setDate(d.getDate() - 1);
+                                        } else break;
+                                    }
+                                    return streak;
+                                })()}
+                            </div>
+                            <div style={{ fontSize: 10, color: '#64748b' }}>🔥 Streak</div>
+                        </div>
+                        <div style={{ width: 1, background: '#334155' }} />
+                        <div>
+                            <div style={{ fontSize: 18, fontWeight: 700, color: '#3b82f6' }}>
+                                {(() => {
+                                    let perfect = 0;
+                                    const start = new Date("2024-12-01");
+                                    const today = new Date();
+                                    const d = new Date(start);
+                                    while (d <= today) {
+                                        const dk = formatDateKey(d);
+                                        const dayBlocks = getSupplementsForDay(d);
+                                        const dayTotal = getTotalSupplements(dayBlocks);
+                                        const dayChecked = checked[dk] || {};
+                                        const dayDone = Object.values(dayBlocks).reduce((sum, b) => 
+                                            sum + b.items.filter(i => dayChecked[i.id]).length, 0);
+                                        if (dayTotal > 0 && dayDone === dayTotal) perfect++;
+                                        d.setDate(d.getDate() + 1);
+                                    }
+                                    return perfect;
+                                })()}
+                            </div>
+                            <div style={{ fontSize: 10, color: '#64748b' }}>✓ Perfeitos</div>
+                        </div>
+                        <div style={{ width: 1, background: '#334155' }} />
+                        <div>
+                            <div style={{ fontSize: 18, fontWeight: 700, color: '#10b981' }}>
+                                {(() => {
+                                    let totalT = 0, takenT = 0;
+                                    const start = new Date("2024-12-01");
+                                    const today = new Date();
+                                    const d = new Date(start);
+                                    while (d <= today) {
+                                        const dk = formatDateKey(d);
+                                        const dayBlocks = getSupplementsForDay(d);
+                                        const dayTotal = getTotalSupplements(dayBlocks);
+                                        totalT += dayTotal;
+                                        const dayChecked = checked[dk] || {};
+                                        Object.values(dayBlocks).forEach(b => 
+                                            b.items.forEach(i => { if (dayChecked[i.id]) takenT++; }));
+                                        d.setDate(d.getDate() + 1);
+                                    }
+                                    return totalT > 0 ? Math.round((takenT / totalT) * 100) : 0;
+                                })()}%
+                            </div>
+                            <div style={{ fontSize: 10, color: '#64748b' }}>📊 Aderência</div>
+                        </div>
+                    </div>
+
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
