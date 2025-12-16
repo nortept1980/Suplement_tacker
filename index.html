@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💊 Supplement Tracker | Maratona 2025</title>
+    <title>💊 Supplement Tracker | Maratona Londres 2026</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -32,6 +32,10 @@
     
     <script type="text/babel">
         const { useState, useEffect } = React;
+
+        // ============ DATAS CRÍTICAS ============
+        const RACE_DATE = new Date("2026-04-26");
+        const PLAN_START = new Date("2025-12-01");
 
         // ============ DEFAULT DATA ============
         const DEFAULT_SUPPLEMENTS = {
@@ -114,11 +118,12 @@
             dormir: { class: "timing-dormir", label: "Dormir" }
         };
 
+        // Fases actualizadas para 2025-2026
         const PHASES = [
-            { id: 1, name: "Base", start: "2024-12-01", end: "2025-01-25", color: "#3b82f6" },
-            { id: 2, name: "Específica", start: "2025-01-26", end: "2025-03-08", color: "#8b5cf6" },
-            { id: 3, name: "Peak", start: "2025-03-09", end: "2025-04-05", color: "#f59e0b" },
-            { id: 4, name: "Taper", start: "2025-04-06", end: "2025-04-26", color: "#10b981" }
+            { id: 1, name: "Base", start: "2025-12-01", end: "2026-01-24", color: "#3b82f6" },
+            { id: 2, name: "Específica", start: "2026-01-25", end: "2026-03-07", color: "#8b5cf6" },
+            { id: 3, name: "Peak", start: "2026-03-08", end: "2026-04-04", color: "#f59e0b" },
+            { id: 4, name: "Taper", start: "2026-04-05", end: "2026-04-26", color: "#10b981" }
         ];
 
         // ============ HELPERS ============
@@ -132,9 +137,20 @@
             return null;
         };
 
-        const getWeek = (date) => {
-            const start = new Date("2024-12-01");
-            return Math.floor((new Date(date) - start) / (7 * 24 * 60 * 60 * 1000)) + 1;
+        const getWeekNumber = (date) => {
+            const d = new Date(date);
+            const diffTime = d - PLAN_START;
+            if (diffTime < 0) return 0;
+            return Math.floor(diffTime / (7 * 24 * 60 * 60 * 1000)) + 1;
+        };
+
+        const getDaysToRace = () => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const race = new Date(RACE_DATE);
+            race.setHours(0, 0, 0, 0);
+            const diff = race - today;
+            return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
         };
 
         const getSupplementsForDay = (date, supplementBlocks) => {
@@ -167,25 +183,44 @@
             const [selectedDate, setSelectedDate] = useState(new Date());
             const [activeTab, setActiveTab] = useState('tracker');
             const [checked, setChecked] = useState(() => {
-                const saved = localStorage.getItem('suppTracker4');
-                return saved ? JSON.parse(saved) : {};
+                try {
+                    const saved = localStorage.getItem('maratonaSupp_checked');
+                    return saved ? JSON.parse(saved) : {};
+                } catch (e) {
+                    console.error('Erro ao carregar dados:', e);
+                    return {};
+                }
             });
             const [supplementBlocks, setSupplementBlocks] = useState(() => {
-                const saved = localStorage.getItem('suppConfig2');
-                return saved ? JSON.parse(saved) : DEFAULT_SUPPLEMENTS;
+                try {
+                    const saved = localStorage.getItem('maratonaSupp_config');
+                    return saved ? JSON.parse(saved) : DEFAULT_SUPPLEMENTS;
+                } catch (e) {
+                    return DEFAULT_SUPPLEMENTS;
+                }
             });
 
+            // Guardar automaticamente
             useEffect(() => {
-                localStorage.setItem('suppTracker4', JSON.stringify(checked));
+                try {
+                    localStorage.setItem('maratonaSupp_checked', JSON.stringify(checked));
+                } catch (e) {
+                    console.error('Erro ao guardar:', e);
+                }
             }, [checked]);
 
             useEffect(() => {
-                localStorage.setItem('suppConfig2', JSON.stringify(supplementBlocks));
+                try {
+                    localStorage.setItem('maratonaSupp_config', JSON.stringify(supplementBlocks));
+                } catch (e) {
+                    console.error('Erro ao guardar config:', e);
+                }
             }, [supplementBlocks]);
 
             const dateKey = formatDateKey(selectedDate);
             const phase = getPhase(selectedDate);
-            const week = getWeek(selectedDate);
+            const week = getWeekNumber(selectedDate);
+            const daysToRace = getDaysToRace();
             const blocks = getSupplementsForDay(selectedDate, supplementBlocks);
             const dayData = checked[dateKey] || {};
             
@@ -225,7 +260,6 @@
                 }
             };
 
-            const daysToRace = Math.max(0, Math.ceil((new Date("2025-04-26") - new Date()) / (1000*60*60*24)));
             const dow = selectedDate.getDay();
             const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
             const dayEmojis = ['🏃', '💪', '🏊', '⚡', '💪', '🏊', '😴'];
@@ -242,25 +276,36 @@
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                             <div>
-                                <div style={{ fontSize: 12, color: '#94a3b8' }}>🏃 Maratona Londres</div>
-                                <div style={{ fontSize: 20, fontWeight: 700 }}>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 2 }}>🏃 Maratona Londres 2026</div>
+                                <div style={{ fontSize: 11, color: '#64748b' }}>26 Abril 2026</div>
+                                <div style={{ fontSize: 28, fontWeight: 700, color: '#f59e0b', marginTop: 4 }}>
                                     {daysToRace} <span style={{ fontSize: 14, fontWeight: 400, color: '#94a3b8' }}>dias</span>
                                 </div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: 12, color: '#94a3b8' }}>
-                                    Sem. {week} • {phase?.name || '—'}
-                                </div>
-                                <div style={{ 
-                                    fontSize: 11, 
-                                    padding: '2px 8px', 
-                                    borderRadius: 99,
-                                    background: phase?.color || '#475569',
-                                    display: 'inline-block',
-                                    marginTop: 4
-                                }}>
-                                    Fase {phase?.id || '—'}
-                                </div>
+                                {week > 0 ? (
+                                    <>
+                                        <div style={{ fontSize: 24, fontWeight: 700, color: '#3b82f6' }}>
+                                            Sem {week}
+                                        </div>
+                                        <div style={{ fontSize: 11, color: '#64748b' }}>de 21 semanas</div>
+                                    </>
+                                ) : (
+                                    <div style={{ fontSize: 12, color: '#64748b' }}>Pré-plano</div>
+                                )}
+                                {phase && (
+                                    <div style={{ 
+                                        fontSize: 11, 
+                                        padding: '3px 10px', 
+                                        borderRadius: 99,
+                                        background: phase.color,
+                                        display: 'inline-block',
+                                        marginTop: 6,
+                                        fontWeight: 500
+                                    }}>
+                                        {phase.name}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -362,6 +407,14 @@
                             <span className="timing-tag timing-dormir">Dormir</span>
                         </div>
                     </div>
+
+                    {/* Storage info */}
+                    <div style={{
+                        marginTop: 8, padding: '8px 12px', background: 'rgba(16, 185, 129, 0.1)',
+                        borderRadius: 8, fontSize: 10, color: '#64748b', textAlign: 'center'
+                    }}>
+                        💾 Dados guardados automaticamente no browser
+                    </div>
                 </div>
             );
         }
@@ -385,7 +438,7 @@
                                 {dayEmojis[dow]} {dayNames[dow]}
                             </div>
                             <div style={{ fontSize: 15, fontWeight: 600 }}>
-                                {selectedDate.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short' })}
+                                {selectedDate.toLocaleDateString('pt-PT', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </div>
                         </div>
                         
@@ -413,7 +466,7 @@
                             return (
                                 <button
                                     key={offset}
-                                    onClick={() => setSelectedDate(d)}
+                                    onClick={() => setSelectedDate(new Date(d))}
                                     style={{
                                         width: 40, height: 48,
                                         border: isSelected ? '2px solid #3b82f6' : '1px solid #334155',
@@ -729,9 +782,8 @@
 
         function calculatePerfectDays(checked, supplementBlocks) {
             let perfect = 0;
-            const start = new Date("2024-12-01");
             const today = new Date();
-            const d = new Date(start);
+            const d = new Date(PLAN_START);
             while (d <= today) {
                 const dk = formatDateKey(d);
                 const dayBlocks = getSupplementsForDay(d, supplementBlocks);
@@ -747,9 +799,8 @@
 
         function calculateAdherence(checked, supplementBlocks) {
             let totalT = 0, takenT = 0;
-            const start = new Date("2024-12-01");
             const today = new Date();
-            const d = new Date(start);
+            const d = new Date(PLAN_START);
             while (d <= today) {
                 const dk = formatDateKey(d);
                 const dayBlocks = getSupplementsForDay(d, supplementBlocks);
