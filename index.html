@@ -13,6 +13,18 @@
         body { background: #0f172a; color: #f1f5f9; min-height: 100vh; }
         input, select { font-family: 'Inter', sans-serif; }
         .tab-active { background: #3b82f6 !important; color: white !important; }
+        .timing-tag {
+            display: inline-block;
+            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 500;
+        }
+        .timing-jejum { background: #fef3c7; color: #92400e; }
+        .timing-refeicao { background: #d1fae5; color: #065f46; }
+        .timing-treino { background: #fce7f3; color: #9d174d; }
+        .timing-dormir { background: #e0e7ff; color: #3730a3; }
     </style>
 </head>
 <body>
@@ -30,24 +42,24 @@
                 color: "#3b82f6",
                 bgColor: "rgba(59, 130, 246, 0.15)",
                 items: [
-                    { id: "boro", name: "Boro", dose: "6mg", caps: 2, notes: "Com pequeno-almoço" },
-                    { id: "d3k2", name: "Vit D3+K2", dose: "5000UI", caps: 1, notes: "Com gordura" },
-                    { id: "magthreo", name: "Mg L-Treonato", dose: "2000mg", caps: 3, notes: "Foco cognitivo" },
-                    { id: "metilfolato", name: "Metilfolato", dose: "400mcg", caps: 1, notes: "Corrigir folato" },
-                    { id: "ashwa_am", name: "Ashwagandha", dose: "300mg", caps: 1, notes: "Energizante" },
-                    { id: "tongkat", name: "Tongkat Ali", dose: "400mg", caps: 2, notes: "SHBG" },
-                    { id: "creatina", name: "Creatina", dose: "5g", caps: null, notes: "Pó com HC" }
+                    { id: "tongkat", name: "Tongkat Ali", dose: "400mg", caps: 2, timing: "jejum", notes: "Em jejum (20min antes p.almoço)" },
+                    { id: "boro", name: "Boro", dose: "6mg", caps: 2, timing: "refeicao", notes: "Com pequeno-almoço" },
+                    { id: "d3k2", name: "Vit D3+K2", dose: "5000UI", caps: 1, timing: "refeicao", notes: "Com p.almoço (precisa gordura)" },
+                    { id: "magthreo", name: "Mg L-Treonato", dose: "2000mg", caps: 3, timing: "refeicao", notes: "Com pequeno-almoço" },
+                    { id: "metilfolato", name: "Metilfolato", dose: "400mcg", caps: 1, timing: "refeicao", notes: "Com pequeno-almoço" },
+                    { id: "ashwa_am", name: "Ashwagandha", dose: "300mg", caps: 1, timing: "refeicao", notes: "Com pequeno-almoço" },
+                    { id: "creatina", name: "Creatina", dose: "5g", caps: null, timing: "refeicao", notes: "Com p.almoço (com hidratos)" }
                 ]
             },
             pretreino: {
                 name: "Pré-Treino",
-                time: "45min antes",
+                time: "Variável",
                 emoji: "⚡",
                 color: "#f59e0b",
                 bgColor: "rgba(245, 158, 11, 0.15)",
                 items: [
-                    { id: "colagenio", name: "Colagénio + Vit C", dose: "15g + 500mg", caps: null, days: [0, 1, 3, 4, 5], notes: "Keith Baar" },
-                    { id: "beterraba", name: "Shot Beterraba", dose: "400mg NO₃", caps: 1, days: [0, 3], notes: "NO boost" }
+                    { id: "colagenio", name: "Colagénio + Vit C", dose: "15g + 500mg", caps: null, days: [0, 1, 3, 4, 5], timing: "treino", notes: "45-60min ANTES do treino" },
+                    { id: "beterraba", name: "Shot Beterraba", dose: "400mg NO₃", caps: 1, days: [0, 3], timing: "treino", notes: "2-3h ANTES do treino" }
                 ]
             },
             almoco: {
@@ -57,7 +69,7 @@
                 color: "#10b981",
                 bgColor: "rgba(16, 185, 129, 0.15)",
                 items: [
-                    { id: "omega_pm1", name: "Ómega-3", dose: "1500mg", caps: 2, notes: "EPA/DHA" }
+                    { id: "omega_pm1", name: "Ómega-3", dose: "1200mg", caps: 4, timing: "refeicao", notes: "Durante o almoço" }
                 ]
             },
             tarde: {
@@ -67,7 +79,7 @@
                 color: "#ec4899",
                 bgColor: "rgba(236, 72, 153, 0.15)",
                 items: [
-                    { id: "cereja_pm1", name: "Cereja Ácida", dose: "30mL", caps: null, taperOnly: true, notes: "Anti-inflamatório" }
+                    { id: "cereja_pm1", name: "Cereja Ácida", dose: "30mL", caps: null, taperOnly: true, timing: "refeicao", notes: "Entre refeições" }
                 ]
             },
             postreino: {
@@ -77,7 +89,7 @@
                 color: "#8b5cf6",
                 bgColor: "rgba(139, 92, 246, 0.15)",
                 items: [
-                    { id: "whey", name: "Whey Isolada", dose: "25-30g", caps: null, days: [0, 1, 2, 3, 4, 5], notes: "Até 30min após" }
+                    { id: "whey", name: "Whey Isolada", dose: "25-30g", caps: null, days: [0, 1, 2, 3, 4, 5], timing: "treino", notes: "Até 30min APÓS treino" }
                 ]
             },
             noite: {
@@ -87,12 +99,19 @@
                 color: "#6366f1",
                 bgColor: "rgba(99, 102, 241, 0.15)",
                 items: [
-                    { id: "omega_pm2", name: "Ómega-3", dose: "1500mg", caps: 2, notes: "EPA/DHA" },
-                    { id: "cereja_pm2", name: "Cereja Ácida", dose: "30mL", caps: null, taperOnly: true, notes: "Melhora sono" },
-                    { id: "magglic", name: "Mg Glicinato", dose: "300mg", caps: 1, notes: "Relaxamento" },
-                    { id: "ashwa_pm", name: "Ashwagandha", dose: "300mg", caps: 1, notes: "Cortisol" }
+                    { id: "omega_pm2", name: "Ómega-3", dose: "1200mg", caps: 4, timing: "refeicao", notes: "Durante o jantar" },
+                    { id: "cereja_pm2", name: "Cereja Ácida", dose: "30mL", caps: null, taperOnly: true, timing: "dormir", notes: "Antes de dormir (melatonina)" },
+                    { id: "magglic", name: "Mg Glicinato", dose: "300mg", caps: 1, timing: "dormir", notes: "Antes de dormir" },
+                    { id: "ashwa_pm", name: "Ashwagandha", dose: "300mg", caps: 1, timing: "dormir", notes: "Antes de dormir (cortisol)" }
                 ]
             }
+        };
+
+        const TIMING_STYLES = {
+            jejum: { class: "timing-jejum", label: "Jejum" },
+            refeicao: { class: "timing-refeicao", label: "C/ Refeição" },
+            treino: { class: "timing-treino", label: "Treino" },
+            dormir: { class: "timing-dormir", label: "Dormir" }
         };
 
         const PHASES = [
@@ -146,22 +165,22 @@
         // ============ APP ============
         function App() {
             const [selectedDate, setSelectedDate] = useState(new Date());
-            const [activeTab, setActiveTab] = useState('tracker'); // 'tracker' or 'settings'
+            const [activeTab, setActiveTab] = useState('tracker');
             const [checked, setChecked] = useState(() => {
-                const saved = localStorage.getItem('suppTracker3');
+                const saved = localStorage.getItem('suppTracker4');
                 return saved ? JSON.parse(saved) : {};
             });
             const [supplementBlocks, setSupplementBlocks] = useState(() => {
-                const saved = localStorage.getItem('suppConfig');
+                const saved = localStorage.getItem('suppConfig2');
                 return saved ? JSON.parse(saved) : DEFAULT_SUPPLEMENTS;
             });
 
             useEffect(() => {
-                localStorage.setItem('suppTracker3', JSON.stringify(checked));
+                localStorage.setItem('suppTracker4', JSON.stringify(checked));
             }, [checked]);
 
             useEffect(() => {
-                localStorage.setItem('suppConfig', JSON.stringify(supplementBlocks));
+                localStorage.setItem('suppConfig2', JSON.stringify(supplementBlocks));
             }, [supplementBlocks]);
 
             const dateKey = formatDateKey(selectedDate);
@@ -268,24 +287,14 @@
                     </div>
 
                     {/* Tabs */}
-                    <div style={{ 
-                        display: 'flex', 
-                        gap: 8, 
-                        marginBottom: 12 
-                    }}>
+                    <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                         <button
                             onClick={() => setActiveTab('tracker')}
                             className={activeTab === 'tracker' ? 'tab-active' : ''}
                             style={{
-                                flex: 1,
-                                padding: '10px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 10,
-                                color: '#94a3b8',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                cursor: 'pointer'
+                                flex: 1, padding: '10px', background: '#1e293b',
+                                border: '1px solid #334155', borderRadius: 10,
+                                color: '#94a3b8', fontSize: 13, fontWeight: 500, cursor: 'pointer'
                             }}
                         >
                             📅 Tracker
@@ -294,15 +303,9 @@
                             onClick={() => setActiveTab('settings')}
                             className={activeTab === 'settings' ? 'tab-active' : ''}
                             style={{
-                                flex: 1,
-                                padding: '10px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 10,
-                                color: '#94a3b8',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                cursor: 'pointer'
+                                flex: 1, padding: '10px', background: '#1e293b',
+                                border: '1px solid #334155', borderRadius: 10,
+                                color: '#94a3b8', fontSize: 13, fontWeight: 500, cursor: 'pointer'
                             }}
                         >
                             ⚙️ Dosagens
@@ -336,31 +339,28 @@
 
                     {/* Footer stats */}
                     <div style={{
-                        marginTop: 16,
-                        padding: '12px 16px',
-                        background: '#1e293b',
-                        borderRadius: 12,
-                        display: 'flex',
-                        justifyContent: 'space-around',
-                        textAlign: 'center'
+                        marginTop: 16, padding: '12px 16px', background: '#1e293b',
+                        borderRadius: 12, display: 'flex', justifyContent: 'space-around', textAlign: 'center'
                     }}>
-                        <StatBox 
-                            label="🔥 Streak" 
-                            value={calculateStreak(checked, supplementBlocks)} 
-                            color="#f59e0b"
-                        />
+                        <StatBox label="🔥 Streak" value={calculateStreak(checked, supplementBlocks)} color="#f59e0b" />
                         <div style={{ width: 1, background: '#334155' }} />
-                        <StatBox 
-                            label="✓ Perfeitos" 
-                            value={calculatePerfectDays(checked, supplementBlocks)} 
-                            color="#3b82f6"
-                        />
+                        <StatBox label="✓ Perfeitos" value={calculatePerfectDays(checked, supplementBlocks)} color="#3b82f6" />
                         <div style={{ width: 1, background: '#334155' }} />
-                        <StatBox 
-                            label="📊 Aderência" 
-                            value={calculateAdherence(checked, supplementBlocks) + '%'} 
-                            color="#10b981"
-                        />
+                        <StatBox label="📊 Aderência" value={calculateAdherence(checked, supplementBlocks) + '%'} color="#10b981" />
+                    </div>
+
+                    {/* Legend */}
+                    <div style={{
+                        marginTop: 12, padding: '10px 14px', background: '#1e293b',
+                        borderRadius: 10, fontSize: 10, color: '#64748b'
+                    }}>
+                        <div style={{ marginBottom: 6, fontWeight: 600, color: '#94a3b8' }}>Legenda Timing:</div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                            <span className="timing-tag timing-jejum">Jejum</span>
+                            <span className="timing-tag timing-refeicao">C/ Refeição</span>
+                            <span className="timing-tag timing-treino">Treino</span>
+                            <span className="timing-tag timing-dormir">Dormir</span>
+                        </div>
                     </div>
                 </div>
             );
@@ -372,13 +372,8 @@
                 <>
                     {/* Date navigation */}
                     <div style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        justifyContent: 'space-between',
-                        background: '#1e293b',
-                        borderRadius: 12,
-                        padding: '8px 12px',
-                        marginBottom: 12
+                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                        background: '#1e293b', borderRadius: 12, padding: '8px 12px', marginBottom: 12
                     }}>
                         <button onClick={() => changeDay(-1)} style={{ 
                             background: 'none', border: 'none', color: '#94a3b8', 
@@ -401,12 +396,7 @@
                     </div>
 
                     {/* Mini calendar week */}
-                    <div style={{ 
-                        display: 'flex', 
-                        gap: 4, 
-                        marginBottom: 16,
-                        justifyContent: 'center'
-                    }}>
+                    <div style={{ display: 'flex', gap: 4, marginBottom: 16, justifyContent: 'center' }}>
                         {[-3, -2, -1, 0, 1, 2, 3].map(offset => {
                             const d = new Date(selectedDate);
                             d.setDate(d.getDate() + offset);
@@ -430,10 +420,8 @@
                                         borderRadius: 8,
                                         background: isSelected ? '#1e3a5f' : '#1e293b',
                                         cursor: 'pointer',
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
+                                        display: 'flex', flexDirection: 'column',
+                                        alignItems: 'center', justifyContent: 'center',
                                         position: 'relative'
                                     }}
                                 >
@@ -441,18 +429,15 @@
                                         {['D','S','T','Q','Q','S','S'][d.getDay()]}
                                     </span>
                                     <span style={{ 
-                                        fontSize: 14, 
-                                        fontWeight: isToday ? 700 : 500,
+                                        fontSize: 14, fontWeight: isToday ? 700 : 500,
                                         color: isToday ? '#3b82f6' : '#f1f5f9'
                                     }}>
                                         {d.getDate()}
                                     </span>
                                     {dayPct > 0 && (
                                         <div style={{
-                                            position: 'absolute',
-                                            bottom: 3,
-                                            width: 6, height: 6,
-                                            borderRadius: '50%',
+                                            position: 'absolute', bottom: 3,
+                                            width: 6, height: 6, borderRadius: '50%',
                                             background: dayPct === 100 ? '#10b981' : dayPct >= 50 ? '#f59e0b' : '#ef4444'
                                         }} />
                                     )}
@@ -470,16 +455,12 @@
 
                             return (
                                 <div key={key} style={{ 
-                                    background: block.bgColor,
-                                    borderRadius: 12,
-                                    border: `1px solid ${block.color}33`,
-                                    overflow: 'hidden'
+                                    background: block.bgColor, borderRadius: 12,
+                                    border: `1px solid ${block.color}33`, overflow: 'hidden'
                                 }}>
                                     <div style={{ 
-                                        padding: '10px 14px',
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
+                                        padding: '10px 14px', display: 'flex',
+                                        justifyContent: 'space-between', alignItems: 'center',
                                         borderBottom: `1px solid ${block.color}22`
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -489,11 +470,7 @@
                                                 <div style={{ fontSize: 11, color: '#94a3b8' }}>{block.time}</div>
                                             </div>
                                         </div>
-                                        <div style={{ 
-                                            fontSize: 12, 
-                                            fontWeight: 600,
-                                            color: allDone ? '#10b981' : block.color
-                                        }}>
+                                        <div style={{ fontSize: 12, fontWeight: 600, color: allDone ? '#10b981' : block.color }}>
                                             {allDone ? '✓' : `${blockDone}/${blockTotal}`}
                                         </div>
                                     </div>
@@ -501,65 +478,52 @@
                                     <div style={{ padding: '6px 8px' }}>
                                         {block.items.map((item, idx) => {
                                             const isChecked = dayData[item.id];
+                                            const timingStyle = TIMING_STYLES[item.timing] || TIMING_STYLES.refeicao;
+                                            
                                             return (
                                                 <button
                                                     key={item.id}
                                                     onClick={() => toggle(item.id)}
                                                     style={{
-                                                        width: '100%',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: 10,
-                                                        padding: '8px 10px',
+                                                        width: '100%', display: 'flex', alignItems: 'center',
+                                                        gap: 10, padding: '10px 10px',
                                                         background: isChecked ? 'rgba(16, 185, 129, 0.2)' : 'transparent',
-                                                        border: 'none',
-                                                        borderRadius: 8,
-                                                        cursor: 'pointer',
+                                                        border: 'none', borderRadius: 8, cursor: 'pointer',
                                                         transition: 'all 0.15s',
-                                                        marginBottom: idx < block.items.length - 1 ? 2 : 0
+                                                        marginBottom: idx < block.items.length - 1 ? 4 : 0
                                                     }}
                                                 >
                                                     <div style={{
-                                                        width: 22, height: 22,
-                                                        borderRadius: 6,
+                                                        width: 24, height: 24, borderRadius: 6,
                                                         border: isChecked ? 'none' : `2px solid ${block.color}`,
                                                         background: isChecked ? '#10b981' : 'transparent',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        fontSize: 12,
-                                                        color: '#fff',
-                                                        flexShrink: 0
+                                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                        fontSize: 14, color: '#fff', flexShrink: 0
                                                     }}>
                                                         {isChecked && '✓'}
                                                     </div>
-                                                    <div style={{ 
-                                                        flex: 1, 
-                                                        textAlign: 'left',
-                                                        opacity: isChecked ? 0.6 : 1
-                                                    }}>
-                                                        <span style={{ 
-                                                            fontSize: 13, 
-                                                            color: '#f1f5f9',
-                                                            textDecoration: isChecked ? 'line-through' : 'none'
-                                                        }}>
-                                                            {item.name}
-                                                        </span>
-                                                        {item.caps && (
+                                                    <div style={{ flex: 1, textAlign: 'left', opacity: isChecked ? 0.5 : 1 }}>
+                                                        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
                                                             <span style={{ 
-                                                                fontSize: 10, 
-                                                                color: '#64748b',
-                                                                marginLeft: 6
+                                                                fontSize: 13, color: '#f1f5f9', fontWeight: 500,
+                                                                textDecoration: isChecked ? 'line-through' : 'none'
                                                             }}>
-                                                                ({item.caps} caps)
+                                                                {item.name}
                                                             </span>
-                                                        )}
+                                                            {item.caps && (
+                                                                <span style={{ fontSize: 11, color: '#64748b', marginLeft: 6 }}>
+                                                                    ({item.caps} caps)
+                                                                </span>
+                                                            )}
+                                                            <span className={`timing-tag ${timingStyle.class}`}>
+                                                                {timingStyle.label}
+                                                            </span>
+                                                        </div>
+                                                        <div style={{ fontSize: 10, color: '#64748b', marginTop: 2 }}>
+                                                            {item.notes}
+                                                        </div>
                                                     </div>
-                                                    <span style={{ 
-                                                        fontSize: 11, 
-                                                        color: '#64748b',
-                                                        opacity: isChecked ? 0.5 : 1
-                                                    }}>
+                                                    <span style={{ fontSize: 11, color: '#94a3b8', opacity: isChecked ? 0.5 : 1, fontWeight: 500 }}>
                                                         {item.dose}
                                                     </span>
                                                 </button>
@@ -580,15 +544,9 @@
                                 setChecked(prev => ({ ...prev, [dateKey]: allIds }));
                             }}
                             style={{
-                                flex: 1,
-                                padding: '12px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 10,
-                                color: '#10b981',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                cursor: 'pointer'
+                                flex: 1, padding: '12px', background: '#1e293b',
+                                border: '1px solid #334155', borderRadius: 10,
+                                color: '#10b981', fontSize: 13, fontWeight: 500, cursor: 'pointer'
                             }}
                         >
                             ✓ Marcar Todos
@@ -596,15 +554,9 @@
                         <button
                             onClick={() => setChecked(prev => ({ ...prev, [dateKey]: {} }))}
                             style={{
-                                flex: 1,
-                                padding: '12px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 10,
-                                color: '#ef4444',
-                                fontSize: 13,
-                                fontWeight: 500,
-                                cursor: 'pointer'
+                                flex: 1, padding: '12px', background: '#1e293b',
+                                border: '1px solid #334155', borderRadius: 10,
+                                color: '#ef4444', fontSize: 13, fontWeight: 500, cursor: 'pointer'
                             }}
                         >
                             ✕ Limpar Dia
@@ -613,13 +565,10 @@
 
                     {phase?.id === 4 && (
                         <div style={{
-                            marginTop: 12,
-                            padding: '10px 14px',
-                            background: 'rgba(16, 185, 129, 0.15)',
-                            borderRadius: 10,
+                            marginTop: 12, padding: '10px 14px',
+                            background: 'rgba(16, 185, 129, 0.15)', borderRadius: 10,
                             border: '1px solid rgba(16, 185, 129, 0.3)',
-                            fontSize: 12,
-                            color: '#94a3b8'
+                            fontSize: 12, color: '#94a3b8'
                         }}>
                             <strong style={{ color: '#10b981' }}>⚡ Fase Taper</strong>
                             <span> — Cereja Ácida 2x/dia + Beterraba diária</span>
@@ -633,23 +582,14 @@
         function SettingsView({ supplementBlocks, updateSupplement, resetToDefaults }) {
             return (
                 <div>
-                    <div style={{ 
-                        display: 'flex', 
-                        justifyContent: 'space-between', 
-                        alignItems: 'center',
-                        marginBottom: 16 
-                    }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                         <h2 style={{ fontSize: 16, fontWeight: 600 }}>⚙️ Configurar Dosagens</h2>
                         <button
                             onClick={resetToDefaults}
                             style={{
-                                padding: '6px 12px',
-                                background: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: 8,
-                                color: '#f59e0b',
-                                fontSize: 11,
-                                cursor: 'pointer'
+                                padding: '6px 12px', background: '#1e293b',
+                                border: '1px solid #334155', borderRadius: 8,
+                                color: '#f59e0b', fontSize: 11, cursor: 'pointer'
                             }}
                         >
                             ↺ Repor
@@ -659,16 +599,11 @@
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                         {Object.entries(supplementBlocks).map(([blockKey, block]) => (
                             <div key={blockKey} style={{ 
-                                background: block.bgColor,
-                                borderRadius: 12,
-                                border: `1px solid ${block.color}33`,
-                                overflow: 'hidden'
+                                background: block.bgColor, borderRadius: 12,
+                                border: `1px solid ${block.color}33`, overflow: 'hidden'
                             }}>
                                 <div style={{ 
-                                    padding: '10px 14px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 8,
+                                    padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8,
                                     borderBottom: `1px solid ${block.color}22`
                                 }}>
                                     <span style={{ fontSize: 16 }}>{block.emoji}</span>
@@ -681,54 +616,67 @@
                                         <div 
                                             key={item.id}
                                             style={{
-                                                display: 'grid',
-                                                gridTemplateColumns: '1fr 80px 60px',
-                                                gap: 8,
-                                                padding: '8px',
-                                                background: 'rgba(0,0,0,0.2)',
-                                                borderRadius: 8,
-                                                marginBottom: idx < block.items.length - 1 ? 6 : 0,
-                                                alignItems: 'center'
+                                                padding: '10px', background: 'rgba(0,0,0,0.2)',
+                                                borderRadius: 8, marginBottom: idx < block.items.length - 1 ? 8 : 0
                                             }}
                                         >
-                                            <div>
-                                                <div style={{ fontSize: 13, fontWeight: 500 }}>{item.name}</div>
-                                                <div style={{ fontSize: 10, color: '#64748b' }}>{item.notes}</div>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                                                <span style={{ fontSize: 13, fontWeight: 600 }}>{item.name}</span>
+                                                <select
+                                                    value={item.timing || 'refeicao'}
+                                                    onChange={(e) => updateSupplement(blockKey, item.id, 'timing', e.target.value)}
+                                                    style={{
+                                                        padding: '4px 8px', background: '#1e293b',
+                                                        border: '1px solid #334155', borderRadius: 6,
+                                                        color: '#f1f5f9', fontSize: 11
+                                                    }}
+                                                >
+                                                    <option value="jejum">Em Jejum</option>
+                                                    <option value="refeicao">C/ Refeição</option>
+                                                    <option value="treino">Treino</option>
+                                                    <option value="dormir">Antes Dormir</option>
+                                                </select>
                                             </div>
+                                            
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 60px', gap: 8, marginBottom: 8 }}>
+                                                <input
+                                                    type="text"
+                                                    value={item.dose}
+                                                    onChange={(e) => updateSupplement(blockKey, item.id, 'dose', e.target.value)}
+                                                    placeholder="Dose"
+                                                    style={{
+                                                        padding: '6px 10px', background: '#1e293b',
+                                                        border: '1px solid #334155', borderRadius: 6,
+                                                        color: '#f1f5f9', fontSize: 12
+                                                    }}
+                                                />
+                                                <input
+                                                    type="text"
+                                                    value={item.caps === null ? '—' : item.caps}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        updateSupplement(blockKey, item.id, 'caps', 
+                                                            val === '—' || val === '' ? null : parseInt(val) || val
+                                                        );
+                                                    }}
+                                                    placeholder="Caps"
+                                                    style={{
+                                                        padding: '6px 10px', background: '#1e293b',
+                                                        border: '1px solid #334155', borderRadius: 6,
+                                                        color: '#f1f5f9', fontSize: 12, textAlign: 'center'
+                                                    }}
+                                                />
+                                            </div>
+                                            
                                             <input
                                                 type="text"
-                                                value={item.dose}
-                                                onChange={(e) => updateSupplement(blockKey, item.id, 'dose', e.target.value)}
-                                                placeholder="Dose"
+                                                value={item.notes}
+                                                onChange={(e) => updateSupplement(blockKey, item.id, 'notes', e.target.value)}
+                                                placeholder="Notas (ex: Em jejum, antes do treino...)"
                                                 style={{
-                                                    padding: '6px 8px',
-                                                    background: '#1e293b',
-                                                    border: '1px solid #334155',
-                                                    borderRadius: 6,
-                                                    color: '#f1f5f9',
-                                                    fontSize: 12,
-                                                    width: '100%'
-                                                }}
-                                            />
-                                            <input
-                                                type="text"
-                                                value={item.caps === null ? '—' : item.caps}
-                                                onChange={(e) => {
-                                                    const val = e.target.value;
-                                                    updateSupplement(blockKey, item.id, 'caps', 
-                                                        val === '—' || val === '' ? null : parseInt(val) || val
-                                                    );
-                                                }}
-                                                placeholder="Caps"
-                                                style={{
-                                                    padding: '6px 8px',
-                                                    background: '#1e293b',
-                                                    border: '1px solid #334155',
-                                                    borderRadius: 6,
-                                                    color: '#f1f5f9',
-                                                    fontSize: 12,
-                                                    width: '100%',
-                                                    textAlign: 'center'
+                                                    width: '100%', padding: '6px 10px', background: '#1e293b',
+                                                    border: '1px solid #334155', borderRadius: 6,
+                                                    color: '#94a3b8', fontSize: 11
                                                 }}
                                             />
                                         </div>
@@ -739,15 +687,12 @@
                     </div>
 
                     <div style={{
-                        marginTop: 16,
-                        padding: '12px',
-                        background: 'rgba(59, 130, 246, 0.1)',
-                        borderRadius: 10,
+                        marginTop: 16, padding: '12px',
+                        background: 'rgba(59, 130, 246, 0.1)', borderRadius: 10,
                         border: '1px solid rgba(59, 130, 246, 0.2)',
-                        fontSize: 11,
-                        color: '#94a3b8'
+                        fontSize: 11, color: '#94a3b8'
                     }}>
-                        💡 <strong>Dica:</strong> As alterações são guardadas automaticamente. Use "—" para suplementos em pó sem cápsulas.
+                        💡 <strong>Dica:</strong> Todas as alterações são guardadas automaticamente. Use "—" para suplementos em pó.
                     </div>
                 </div>
             );
